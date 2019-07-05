@@ -1,0 +1,1121 @@
+create table admin_permission
+(
+	id int auto_increment
+		primary key,
+	name varchar(100) not null,
+	description varchar(100) null,
+	constraint idx_permission_name
+		unique (name)
+)
+;
+
+create table admin_role
+(
+	id int auto_increment
+		primary key,
+	name varchar(100) not null,
+	description varchar(100) null,
+	created_date timestamp default CURRENT_TIMESTAMP not null,
+	created_by int null,
+	modified_date timestamp default '0000-00-00 00:00:00' not null,
+	modified_by int null,
+	constraint idx_rolename
+		unique (name)
+)
+;
+
+create table admin_role_permission
+(
+	id int auto_increment
+		primary key,
+	roleId int not null,
+	permissionId int not null,
+	created_date timestamp default CURRENT_TIMESTAMP not null,
+	created_by int null,
+	constraint idx_role_permission
+		unique (roleId, permissionId)
+)
+;
+
+create index fk_ROLE_PERMISSION_2
+	on admin_role_permission (permissionId)
+;
+
+create table admin_user
+(
+	id int auto_increment
+		primary key,
+	username varchar(45) not null,
+	password varchar(255) not null,
+	mobile varchar(45) null,
+	realname varchar(45) null,
+	status varchar(1) not null,
+	login_failure_ct int null,
+	last_login_ts timestamp default CURRENT_TIMESTAMP not null,
+	last_login_failure_ts timestamp default '0000-00-00 00:00:00' not null,
+	created_date timestamp default '0000-00-00 00:00:00' not null,
+	created_by int null,
+	modified_date timestamp default '0000-00-00 00:00:00' not null,
+	modified_by int null,
+	email varchar(255) null,
+	token varchar(500) null,
+	constraint idx_username
+		unique (username)
+)
+;
+
+create index mobile
+	on admin_user (mobile)
+;
+
+create table admin_user_role
+(
+	id int auto_increment
+		primary key,
+	userId int not null,
+	roleId int not null,
+	created_date timestamp default CURRENT_TIMESTAMP not null,
+	created_by int null,
+	constraint idx_user_role
+		unique (userId, roleId)
+)
+;
+
+create index fk_USER_ROLE_2
+	on admin_user_role (roleId)
+;
+
+create table applicant_user
+(
+	id int auto_increment
+		primary key,
+	username varchar(45) null,
+	password varchar(255) not null,
+	mobile varchar(45) not null,
+	captcha varchar(45) null,
+	status varchar(1) not null,
+	login_failure_ct int null,
+	last_login_ts timestamp default CURRENT_TIMESTAMP not null,
+	last_login_failure_ts timestamp default '0000-00-00 00:00:00' not null,
+	created_date timestamp default '0000-00-00 00:00:00' not null,
+	modified_date timestamp default '0000-00-00 00:00:00' not null,
+	token varchar(500) null,
+	constraint idx_username
+		unique (username),
+	constraint mobile
+		unique (mobile)
+)
+comment '求职者用户表'
+;
+
+create table application_form
+(
+	id int auto_increment
+		primary key,
+	recruitmentID int not null,
+	company_name varchar(255) null,
+	contact_name varchar(255) null,
+	mobile_number mediumtext null
+)
+;
+
+create table audit_position
+(
+	id int auto_increment
+		primary key,
+	recruitment_id int null,
+	company_id int null,
+	position_name varchar(50) null,
+	position_description varchar(2000) null,
+	recruit_number int null,
+	status int default '0' null
+)
+;
+
+create table banner
+(
+	id int auto_increment
+		primary key,
+	link varchar(255) null,
+	banner_id varchar(50) null,
+	update_ts timestamp default CURRENT_TIMESTAMP not null,
+	update_by varchar(50) null
+)
+;
+
+create table book_booth
+(
+	id int auto_increment
+		primary key,
+	recruitment_id int not null comment '招聘会id',
+	company_id int not null comment '企业id',
+	booth_id int null comment '展位ID',
+	captcha varchar(50) null comment '签到码\n',
+	create_ts timestamp default CURRENT_TIMESTAMP null,
+	create_by varchar(11) not null
+)
+comment '订展表'
+;
+
+create index booth_id
+	on book_booth (booth_id)
+;
+
+create index company_id
+	on book_booth (company_id)
+;
+
+create index recruitment_id
+	on book_booth (recruitment_id)
+;
+
+create table book_booth_position_record
+(
+	id int auto_increment
+		primary key,
+	book_booth_id int not null,
+	position_record_id int not null,
+	order_num int default '0' not null,
+	select_order int default '0' not null,
+	create_ts timestamp default CURRENT_TIMESTAMP not null
+)
+;
+
+create index book_booth_id
+	on book_booth_position_record (book_booth_id)
+;
+
+create index position_record_id
+	on book_booth_position_record (position_record_id)
+;
+
+create table booth
+(
+	id int auto_increment
+		primary key,
+	ip varchar(50) null,
+	tv_ip varchar(50) null
+)
+;
+
+create table collection_position
+(
+	id int auto_increment
+		primary key,
+	user_id int not null comment '用户id',
+	book_booth_position_record_id int not null comment '岗位记录id',
+	create_ts timestamp default CURRENT_TIMESTAMP not null
+)
+comment '岗位收藏表'
+;
+
+create index user_id
+	on collection_position (user_id)
+;
+
+create table company
+(
+	id int auto_increment
+		primary key,
+	name varchar(50) not null comment '公司名字
+	',
+	type_id tinyint(3) null comment '公司类型',
+	address varchar(255) null comment '公司地址',
+	contact_number varchar(20) null comment '联系人号码',
+	customer_manager_id int null comment '客户经理ID',
+	contact_name varchar(20) null comment '联系人姓名',
+	status int default '0' not null comment '企业状态',
+	logo_id varchar(50) null comment '企业logoID',
+	video_id varchar(50) null comment '公司视频id',
+	exhibitor varchar(50) null comment '参展联系人',
+	exhibitor_number varchar(20) null comment '参展联系人号码',
+	email varchar(50) null,
+	create_by varchar(11) null,
+	create_ts timestamp default CURRENT_TIMESTAMP not null,
+	update_by varchar(11) null,
+	update_ts timestamp default CURRENT_TIMESTAMP not null,
+	description varchar(2000) null,
+	trade_id int null
+)
+comment '公司表'
+;
+
+create index address
+	on company (address)
+;
+
+create index name
+	on company (name)
+;
+
+create index status
+	on company (status)
+;
+
+
+create table company_picture
+(
+	id int auto_increment
+		primary key,
+	company_id int null,
+	picture_id varchar(50) null
+)
+comment '公司图片关联表'
+;
+
+
+
+create index company_id
+	on company_picture (company_id)
+;
+
+
+create table company_sign
+(
+	id int auto_increment
+		primary key,
+	recruitment_id int not null comment '招聘会id',
+	company_id int not null comment '企业id',
+	booth_id int not null comment '展位id',
+	meals_number tinyint(3) default '0' null comment '就餐人数',
+	is_parking tinyint(3) default '0' null comment '是否停车 0:不停，1停',
+	captcha varchar(50) not null comment '签到码',
+	status tinyint(3) not null comment '状态: 0未签到，1已签到，2已签退',
+	create_ts timestamp default CURRENT_TIMESTAMP not null comment '创建时间',
+	update_ts timestamp null comment '更新时间'
+)
+comment '企业签到表'
+;
+
+create index booth_id
+	on company_sign (booth_id)
+;
+
+create index captcha
+	on company_sign (captcha)
+;
+
+create index company_id
+	on company_sign (company_id)
+;
+
+create index recruitment_id
+	on company_sign (recruitment_id)
+;
+
+create table course
+(
+	id int auto_increment
+		primary key,
+	name varchar(80) null,
+	description varchar(255) null
+)
+;
+
+create table dict_data
+(
+	dict_id smallint(6) auto_increment comment '主键'
+		primary key,
+	def_id smallint(6) default '0' not null,
+	dict_value varchar(200) default '0' not null comment '字典表内容',
+	seq_index tinyint(3) default '0' not null comment '排序',
+	description varchar(100) default '0' not null comment '描述'
+)
+comment '字典表内容表'
+;
+
+create table dict_def
+(
+	def_id int(2) unsigned auto_increment comment '主键'
+		primary key,
+	def_code varchar(32) default '0' not null comment '定义code',
+	description varchar(30) default '0' not null comment '定义描述'
+)
+comment '字典表定义表'
+;
+
+create table education
+(
+	id int auto_increment
+		primary key,
+	name varchar(11) null,
+	constraint education_id_uindex
+		unique (id)
+)
+;
+
+create table magic_number
+(
+	type int not null comment '1:userId'
+		primary key,
+	value int not null,
+	version int not null,
+	note varchar(50) null comment '说明'
+)
+	comment '自定义数字表'
+;
+
+create table mobile_captcha
+(
+	id int auto_increment
+		primary key,
+	mobile varchar(45) null,
+	captcha varchar(45) null
+)
+;
+
+create table operation_log
+(
+	id int auto_increment
+		primary key,
+	operator varchar(45) not null,
+	action varchar(255) not null,
+	tName varchar(40) not null,
+	operation_time timestamp default CURRENT_TIMESTAMP not null,
+	comment_ varchar(500) null,
+	module_name varchar(40) null,
+	before_value varchar(4000) null,
+	after_value varchar(4000) null
+)
+;
+
+create index action
+	on operation_log (action)
+;
+
+create index operation_time
+	on operation_log (operation_time)
+;
+
+create index tName
+	on operation_log (tName)
+;
+
+create table position
+(
+	id int auto_increment
+		primary key,
+	company_id int null,
+	name varchar(50) not null comment '岗位名称',
+	education_id int default '0' not null comment '学历id',
+	working_years_id int default '0' not null comment '工作年限id',
+	salary_id int null comment '薪水id',
+	recruit_number int not null comment '招聘人数',
+	description varchar(2000) null comment '岗位描述
+	',
+	update_ts timestamp default CURRENT_TIMESTAMP not null comment '更新时间
+	',
+	status tinyint(3) default '0' not null,
+	update_by varchar(50) null,
+	create_by varchar(50) not null,
+	property tinyint(3) default '0' not null,
+	tag_id int null,
+	s_region_id int null
+)
+comment '岗位表'
+;
+
+create index company_id
+	on position (company_id)
+;
+
+create index status
+	on position (status)
+;
+
+create table position_record
+(
+	id int auto_increment
+		primary key,
+	company_id int not null comment '企业id',
+	recruitment_id int not null comment '招聘会id',
+	name varchar(50) not null comment '岗位名称',
+	education_id int default '0' not null comment '学历id',
+	working_years_id int default '0' not null comment '工作年限id',
+	salary_id int null comment '薪水id',
+	s_region_id int null comment '省市区ID',
+	property tinyint(3) default '0' not null comment '0全职 1兼职',
+	tag_id int null comment '工种',
+	recruit_number smallint(6) not null comment '招聘人数',
+	description text null comment '岗位描述\r\n	',
+	update_by varchar(11) null,
+	update_ts timestamp default CURRENT_TIMESTAMP not null comment '更新时间n	',
+	create_ts timestamp default CURRENT_TIMESTAMP not null,
+	create_by varchar(11) not null
+)
+comment '岗位记录表'
+;
+
+create index company_id
+	on position_record (company_id)
+;
+
+create index recruitment_id
+	on position_record (recruitment_id)
+;
+
+create table product
+(
+	id varchar(11) not null
+		primary key,
+	name varchar(80) null,
+	category varchar(255) null,
+	description varchar(255) null
+)
+;
+
+create table qr_code
+(
+	id int auto_increment
+		primary key,
+	user_id int not null,
+	code varchar(50) not null,
+	jump_type tinyint default '0' not null comment '跳转标记，1表示已扫码',
+	create_ts timestamp default CURRENT_TIMESTAMP not null
+)
+comment '二维码表'
+;
+
+create index code
+	on qr_code (code)
+;
+
+create index user_id
+	on qr_code (user_id)
+;
+
+create table qr_code_record
+(
+	id int auto_increment
+		primary key,
+	qr_code_id int null comment '二维码id',
+	recruitment_id int not null,
+	type tinyint not null comment '2 出场；1 入场',
+	create_ts timestamp default CURRENT_TIMESTAMP not null
+)
+comment '二维码出入场记录表'
+;
+
+create index qr_code_id
+	on qr_code_record (qr_code_id)
+;
+
+create index recruitment_id
+	on qr_code_record (recruitment_id)
+;
+
+create index type
+	on qr_code_record (type)
+;
+
+create table range_age
+(
+	id int auto_increment
+		primary key,
+	name varchar(11) not null,
+	min int null,
+	max int null,
+	constraint work_years_column_1_uindex
+		unique (id)
+)
+comment '年龄区间表'
+;
+
+create table recruitment
+(
+	id int auto_increment
+		primary key,
+	name varchar(50) not null comment '招聘会名称',
+	date date null comment '招聘会日期',
+	type_id int not null comment '招聘会类型id',
+	address varchar(50) not null comment '招聘会地址',
+	is_appointment tinyint(1) default '0' not null comment '是否提供预约',
+	appearances tinyint(3) null comment '招聘会场次0:上午场，1下午场，2全天',
+	introduction varchar(2000) null comment '介绍
+	',
+	company_number int default '0' not null,
+	recruit_number int default '0' null comment '招聘会招聘人数
+	',
+	position_number int default '0' null comment '岗位数量
+	',
+	status int default '0' null comment '招聘会状态 0正常1删除状态',
+	more_interview tinyint(1) null,
+	create_by varchar(50) not null comment '创建人',
+	update_by varchar(50) null,
+	update_ts timestamp default CURRENT_TIMESTAMP null,
+	create_ts timestamp default CURRENT_TIMESTAMP not null,
+	reception_number int default '0' null comment '接待人数',
+	pass_number int default '0' null comment '通过人数',
+	not_pass_number int default '0' null comment '未通过人数',
+	style int default '0' not null comment '0 综合 1专场',
+	undetermined_number int default '0' not null,
+	device tinyint(1) default '0' not null comment '设备标记位  0不使用 1使用',
+	meals_number int default '0' null,
+	start_type tinyint(3) default '0' not null comment '开始标志位:0 未开始；1进行中； 2已结束',
+	age_18_25 int null,
+	age_26_35 int null,
+	age_36_50 int null,
+	age_50 int null,
+	from_gx tinyint(1) default '0' null comment '来源标志位：0 现场系统 ；1 高新系统'
+)
+comment '招聘会'
+;
+
+create index device
+	on recruitment (device)
+;
+
+create index start_type
+	on recruitment (start_type)
+;
+
+create index status
+	on recruitment (status)
+;
+
+create index style
+	on recruitment (style)
+;
+
+create index type_id
+	on recruitment (type_id)
+;
+
+create table recruitment_type
+(
+	id int auto_increment
+		primary key,
+	name varchar(50) null,
+	update_ts timestamp default CURRENT_TIMESTAMP not null,
+	update_by varchar(50) null,
+	create_by varchar(11) not null,
+	create_ts timestamp default CURRENT_TIMESTAMP not null,
+	constraint recruitment_type_name_uindex
+		unique (name)
+)
+comment '招聘会类型表'
+;
+
+create table recycle
+(
+	id int auto_increment
+		primary key,
+	type varchar(50) not null comment '删除的类型',
+	delete_id int not null comment '被删除数据的ID',
+	delete_date timestamp default CURRENT_TIMESTAMP not null,
+	name varchar(50) null,
+	constraint recycle_id_uindex
+		unique (id)
+)
+comment '回收站'
+;
+
+create table resume
+(
+	id int auto_increment
+		primary key,
+	user_id int null,
+	name varchar(50) null comment '简历名称',
+	work_type int null comment '工种',
+	work_years int null comment '工作年限',
+	work_time_type int null comment '工作类型：0兼职；1 全职； 2 实习',
+	expected_salary int null comment '期望月薪',
+	region int null comment '地区id',
+	self_introduction varchar(1500) null comment '自我介绍',
+	source tinyint null comment '简历来源：0 本地创建；1 BOSS直聘；2 智联招聘；3 高新人才网',
+	default_flag tinyint default '0' null comment '是否默认：0 否；1 是',
+	perfect_flag tinyint default '0' null comment '是否完善：0 否；1 是',
+	ftp_url varchar(200) null comment '上传简历的存放路径',
+	create_ts timestamp default CURRENT_TIMESTAMP not null,
+	update_ts timestamp default CURRENT_TIMESTAMP not null,
+	s_region_ids varchar(50) null,
+	status tinyint default '1' not null comment '1-未被微信用户删除，0被微信用户删除'
+)
+comment '简历表'
+;
+
+create index perfect_flag
+	on resume (perfect_flag)
+;
+
+create index user_id
+	on resume (user_id)
+;
+
+create table resume_delivery
+(
+	id int auto_increment
+		primary key,
+	user_id int not null comment '投递用户id',
+	resume_id int not null comment '简历id',
+	recruitment_id int not null comment '招聘会id',
+	company_id int not null comment '公司id',
+	position_record_id int not null comment '岗位记录id',
+	booth_id int not null comment '展位id',
+	parent_booth_id int default '0' not null comment '第一个展位id，无则为0',
+	interview_num tinyint(3) default '1' not null comment '面试轮次：默认1',
+	interview_status tinyint(3) not null comment '面试状态：0 未面试；1面试中；2已面试',
+	interview_result tinyint(3) default '-1' not null comment '面试结果：-1 暂无 ;  0 未通过；1 已通过； 2 待定',
+	pass_status tinyint(3) default '0' not null comment '是否pass: 0未pass过，1已经pass过',
+	matching tinyint(3) default '0' not null comment '岗位匹配度',
+	profession tinyint(3) default '0' not null comment '专业基础',
+	learning tinyint(3) default '0' not null comment '学习能力',
+	communicate tinyint(3) default '0' not null comment '沟通协调',
+	order_num smallint(6) not null comment '面试序号',
+	is_over tinyint(3) default '0' null comment '是否最终面 0：否，1是',
+	interview_evaluation varchar(500) null comment '面试评价',
+	create_ts timestamp default CURRENT_TIMESTAMP null,
+	update_ts timestamp default CURRENT_TIMESTAMP null
+)
+comment '简历投递表'
+;
+
+create index booth_id
+	on resume_delivery (booth_id)
+;
+
+create index company_id
+	on resume_delivery (company_id)
+;
+
+create index parent_booth_id
+	on resume_delivery (parent_booth_id)
+;
+
+create index position_record_id
+	on resume_delivery (position_record_id)
+;
+
+create index recruitment_id
+	on resume_delivery (recruitment_id)
+;
+
+create index resume_id
+	on resume_delivery (resume_id)
+;
+
+create index user_id
+	on resume_delivery (user_id)
+;
+
+create table resume_delivery_pre
+(
+	id int auto_increment
+		primary key,
+	user_id int not null comment '投递用户id',
+	resume_id int not null comment '简历id',
+	recruitment_id int not null comment '招聘会id',
+	company_id int not null comment '公司id',
+	position_record_id int not null comment '岗位记录id',
+	booth_id int not null comment '展位id',
+	delivery_flag int default '0' not null comment '预投递是否真实投递：0未投递；1已经投递',
+	create_ts timestamp default CURRENT_TIMESTAMP null,
+	update_ts timestamp default CURRENT_TIMESTAMP null
+)
+comment '简历投递表'
+;
+
+create index booth_id
+	on resume_delivery_pre (booth_id)
+;
+
+create index company_id
+	on resume_delivery_pre (company_id)
+;
+
+create index delivery_flag
+	on resume_delivery_pre (delivery_flag)
+;
+
+create index position_record_id
+	on resume_delivery_pre (position_record_id)
+;
+
+create index recruitment_id
+	on resume_delivery_pre (recruitment_id)
+;
+
+create index resume_id
+	on resume_delivery_pre (resume_id)
+;
+
+create index user_id
+	on resume_delivery_pre (user_id)
+;
+
+create table review_position_record
+(
+	id int auto_increment
+		primary key,
+	position_record_id int null,
+	recruitment_id int null,
+	company_id int null,
+	booth_id int null,
+	book_booth_id int null,
+	name varchar(50) null,
+	old_name varchar(50) null comment '更新前的名字',
+	education_id int null,
+	working_years_id int null,
+	salary_id int null,
+	s_region_id int null,
+	property int default '0' not null,
+	tag_id int null,
+	recruit_number int null,
+	description text null,
+	status int default '0' not null comment '审核状态默认0 未审核 1审核通过 2审核未通过',
+	suggestion varchar(500) null comment '审核意见',
+	create_ts timestamp default CURRENT_TIMESTAMP not null
+)
+;
+
+create index book_booth_id
+	on review_position_record (book_booth_id)
+;
+
+create index booth_id
+	on review_position_record (booth_id)
+;
+
+create index company_id
+	on review_position_record (company_id)
+;
+
+create index position_record_id
+	on review_position_record (position_record_id)
+;
+
+create index recruitment_id
+	on review_position_record (recruitment_id)
+;
+
+create index status
+	on review_position_record (status)
+;
+
+create table s_region
+(
+	ID int(6) not null
+		primary key,
+	NAME varchar(50) null comment '名称',
+	PARENT_ID int(6) null comment '父节点',
+	SHORT_NAME varchar(50) null comment '短名称',
+	LEVEL_TYPE int(1) null comment '层级',
+	CITY_CODE varchar(4) null comment '区号',
+	ZIP_CODE varchar(6) null comment '邮编',
+	MERGER_NAME varchar(255) null comment '全名',
+	PINYIN varchar(255) null comment '拼音',
+	LNG varchar(20) null,
+	LAT varchar(20) null,
+	OPEN_FLAG varchar(1) default '0' not null comment '开放城市，只有市级有此属性 0未开放 1开放 ',
+	TREE_PATH varchar(50) null,
+	LOGIN_FLAG varchar(1) default '0' null comment '登录城市，只有省级或直辖市有此属性  0-不是登录城市，1--是登录城市',
+	HOT_FLAG varchar(1) default '0' null comment '热门城市，只有是在登录城市下的才能是热门城市，0--不是热门城市，1--是热门城市'
+)
+comment '地区表'
+;
+
+create index MERGER_NAME
+	on s_region (MERGER_NAME)
+;
+
+create index PARENT_ID
+	on s_region (PARENT_ID)
+;
+
+create table shield_company
+(
+	id int auto_increment
+		primary key,
+	user_id int not null comment '用户id',
+	resume_id int not null comment '简历id',
+	company_id int not null comment '公司id',
+	company_name varchar(50) not null comment '公司名称',
+	create_ts timestamp default CURRENT_TIMESTAMP not null
+)
+comment '公司屏蔽表'
+;
+
+create index company_id
+	on shield_company (company_id)
+;
+
+create index resume_id
+	on shield_company (resume_id)
+;
+
+create index user_id
+	on shield_company (user_id)
+;
+
+create table sms
+(
+	id int auto_increment
+		primary key,
+	type tinyint(3) not null comment '0-订展邀请，1-面试邀请,2-入场邀请, 3-面试提醒，4-智能匹配邀约，8 注册，9 登录',
+	recruitment_id int null comment '招聘会id',
+	company_id int null comment '公司id',
+	booth_id int null comment '展位id',
+	user_id int null comment '用户id',
+	is_success tinyint(3) default '0' not null comment '是否成功，0不成功，1成功 , 2异常',
+	mobile varchar(50) default '0' not null comment '手机号',
+	code varchar(500) default '0' null comment '返回code信息',
+	template_code varchar(50) default '0' not null comment '短信模板code',
+	sms_info varchar(500) default '0' null comment '短信信息',
+	create_ts timestamp default CURRENT_TIMESTAMP not null comment '发送时间'
+)
+comment '短信发送记录表'
+;
+
+create index booth_id
+	on sms (booth_id)
+;
+
+create index company_id
+	on sms (company_id)
+;
+
+create index recruitment_id
+	on sms (recruitment_id)
+;
+
+create index user_id
+	on sms (user_id)
+;
+
+create table statistical_table
+(
+	id int auto_increment
+		primary key,
+	recruitment_id int null,
+	recruitment_name varchar(255) null,
+	booth_id int null,
+	position_name varchar(255) null,
+	company_name varchar(255) null,
+	position_description varchar(2000) null,
+	education varchar(50) null,
+	recruit_number int null
+)
+comment '招聘会详情表'
+;
+
+create table tag
+(
+	id int auto_increment
+		primary key,
+	name varchar(50) not null,
+	parent_id int not null,
+	LEVEL_TYPE int(1) not null,
+	MERGER_NAME varchar(255) null,
+	TREE_PATH varchar(50) not null,
+	constraint tag_id_uindex
+		unique (id)
+)
+;
+
+create index parent_id
+	on tag (parent_id)
+;
+
+create table templet_booth
+(
+	id int auto_increment
+		primary key,
+	booth_id int null,
+	templet_id int null,
+	recruitment_id int null,
+	comments varchar(255) null,
+	operation int default '0' not null comment '是否人为操作标记'
+)
+;
+
+create index booth_id
+	on templet_booth (booth_id)
+;
+
+create index recruitment_id
+	on templet_booth (recruitment_id)
+;
+
+create index templet_id
+	on templet_booth (templet_id)
+;
+
+create table todo
+(
+	id int auto_increment
+		primary key,
+	create_id int null,
+	create_time timestamp default CURRENT_TIMESTAMP not null,
+	process_id int null,
+	process_time timestamp default '0000-00-00 00:00:00' not null,
+	work_name varchar(100) null,
+	work_content varchar(4000) null,
+	from_module varchar(20) null,
+	url varchar(1000) null,
+	status varchar(1) null,
+	work_priority int null
+)
+;
+
+create index fk_todo_1
+	on todo (create_id)
+;
+
+create index fk_todo_2
+	on todo (process_id)
+;
+
+create index status
+	on todo (status)
+;
+
+create table total_table
+(
+	id int auto_increment
+		primary key,
+	recruitment_name varchar(255) null,
+	recruitment_type varchar(255) null,
+	date date null,
+	company_number int null,
+	position_number int null,
+	visitor_number int null,
+	pass_number int null,
+	undetermined_number int null,
+	recruitment_id int null
+)
+;
+
+create table update_ts
+(
+	id int auto_increment
+		primary key,
+	last_update_ts timestamp default CURRENT_TIMESTAMP not null
+)
+;
+
+create table user_education_experience
+(
+	id int auto_increment
+		primary key,
+	user_id int not null,
+	resume_id int not null,
+	educational int null comment '学历',
+	local_zj tinyint null comment '是否浙江户籍学生：0 不是；1 是',
+	school varchar(50) null comment '学校',
+	major varchar(50) null comment '专业',
+	end_ts varchar(50) null comment '毕业时间',
+	start_ts varchar(50) null comment '入学时间',
+	create_ts timestamp default CURRENT_TIMESTAMP not null,
+	update_ts timestamp default CURRENT_TIMESTAMP not null
+)
+comment '教育经历表'
+;
+
+create index resume_id
+	on user_education_experience (resume_id)
+;
+
+create table user_info
+(
+	id int auto_increment
+		primary key,
+	user_id int null comment '用户id',
+	name varchar(50) null comment '姓名',
+	phone varchar(50) null comment '电话',
+	email varchar(50) null comment '邮箱',
+	identity_card varchar(50) null comment '身份证',
+	sex int null comment '性别',
+	nation int null comment '民族',
+	type int null comment '类型：0 应届高校毕业生；1 在职； 2 离职',
+	birth_date date null comment '出生日期',
+	educational int null comment '文化程度',
+	address varchar(1000) null comment '居住地',
+	create_Ts timestamp default CURRENT_TIMESTAMP not null,
+	update_Ts timestamp default CURRENT_TIMESTAMP not null,
+	constraint user_id
+		unique (user_id)
+)
+comment '个人信息表'
+;
+
+create index birth_date
+	on user_info (birth_date)
+;
+
+create index educational
+	on user_info (educational)
+;
+
+create index name
+	on user_info (name)
+;
+
+create index phone
+	on user_info (phone)
+;
+
+create table user_project_experience
+(
+	id int auto_increment
+		primary key,
+	user_id int not null,
+	resume_id int not null,
+	description varchar(5000) null comment '描述',
+	company varchar(50) null comment '公司',
+	project_name varchar(1000) null comment '职位',
+	duty varchar(1000) null comment '职责描述',
+	start_ts varchar(50) null comment '起始时间',
+	end_ts varchar(50) null comment '结束时间',
+	create_ts timestamp default CURRENT_TIMESTAMP not null,
+	update_ts timestamp default CURRENT_TIMESTAMP not null
+)
+comment '工作经历表'
+;
+
+create index resume_id
+	on user_project_experience (resume_id)
+;
+
+create table user_work_experience
+(
+	id int auto_increment
+		primary key,
+	user_id int not null,
+	resume_id int not null,
+	description varchar(5000) null comment '描述',
+	company varchar(50) null comment '公司',
+	job text null comment '职位',
+	start_ts varchar(50) null comment '起始时间',
+	end_ts varchar(50) null comment '结束时间',
+	create_ts timestamp default CURRENT_TIMESTAMP not null,
+	update_ts timestamp default CURRENT_TIMESTAMP not null
+)
+comment '工作经历表'
+;
+
+create index resume_id
+	on user_work_experience (resume_id)
+;
+
+create table users
+(
+	id int auto_increment
+		primary key,
+	username varchar(255) null,
+	password varchar(255) null,
+	name varchar(255) null
+)
+;
+
+create table work_years
+(
+	id int auto_increment
+		primary key,
+	name varchar(11) not null,
+	min int null,
+	max int null,
+	constraint work_years_column_1_uindex
+		unique (id)
+)
+;
+
